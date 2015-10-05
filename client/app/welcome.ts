@@ -1,16 +1,25 @@
 import {computedFrom} from 'aurelia-framework';
+import {friends} from '../../collections/friends'
 
-export class Welcome{
-  heading = 'Welcome to the Aurelia Navigation App!';
-  firstName = 'John';
-  lastName = 'Doe';
-  previousValue = this.fullName;
+export class Welcome {
+
+  heading : string;
+  firstName : string;
+  lastName : string;
+  previousValue: string;
+
+  constructor(){
+    this.heading = 'Welcome to the Aurelia Navigation App!';
+    this.firstName = friends.findOne().name.fn;
+    this.lastName = friends.findOne().name.ln;
+    this.previousValue = this.fullName;
+  }
 
   //Getters can't be observed with Object.observe, so they must be dirty checked.
   //However, if you tell Aurelia the dependencies, it no longer needs to dirty check the property.
   //To optimize by declaring the properties that this getter is computed from, uncomment the line below.
-  //@computedFrom('firstName', 'lastName')
-  get fullName(){
+  @computedFrom('firstName', 'lastName')
+  get fullName() : string{
     return `${this.firstName} ${this.lastName}`;
   }
 

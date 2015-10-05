@@ -1,0 +1,1 @@
+export var friends = new Mongo.Collection('friends');
