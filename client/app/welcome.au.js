@@ -1,5 +1,4 @@
 import {computedFrom} from 'aurelia-framework';
-import {friends} from '../../collections/friends'
 
 export class Welcome {
 
@@ -10,8 +9,8 @@ export class Welcome {
 
   constructor(){
     this.heading = 'Welcome to the Aurelia Navigation App!';
-    this.firstName = friends.findOne().name.fn;
-    this.lastName = friends.findOne().name.ln;
+    this.firstName = 'Liu';
+    this.lastName = 'Ping';
     this.previousValue = this.fullName;
   }
 

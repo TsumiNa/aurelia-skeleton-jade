@@ -22,6 +22,7 @@ ecmascript@0.1.5
 ecmascript-collections@0.1.6
 ejson@1.0.7
 fastclick@1.0.7
+fortawesome:fontawesome@4.4.0
 geojson-utils@1.0.4
 hot-code-push@1.0.0
 html-tools@1.0.5
@@ -58,8 +59,8 @@ standard-minifiers@1.0.1
 templating@1.1.4
 templating-tools@1.0.0
 tracker@1.0.9
-tsumina:meteor-aurelia@0.4.5
-tsumina:meteor-typescript@0.1.0
+tsumina:meteor-aurelia@0.5.0
+tsumina:meteor-systemjs@0.0.3
 twbs:bootstrap@3.3.5
 ui@1.0.8
 underscore@1.0.4
