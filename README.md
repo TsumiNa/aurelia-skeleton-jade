@@ -8,3 +8,5 @@ This skeleton-navigation example uses Bootstrap and fontawesome package:
 $ meteor add twbs:bootstrap
 $ meteor add fortawesome:fontawesome
 ```
+
+`typescript-jade` branch show typescript example.
