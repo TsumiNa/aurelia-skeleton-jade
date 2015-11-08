@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "module": "system",
+        "target": "ES5",
+        "noImplicitAny": false,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "experimentalDecorators": true
+    },
+    "exclude": [
+        "node_modules",
+        ".meteor"
+    ]
+}
