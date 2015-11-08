@@ -2,7 +2,7 @@
     "compilerOptions": {
         "module": "system",
         "target": "ES5",
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
         "experimentalDecorators": true

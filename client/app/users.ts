@@ -1,12 +1,13 @@
-import {inject} from 'aurelia-framework';
+import {autoinject} from 'aurelia-framework';
 import {HttpClient} from 'aurelia-fetch-client';
 
-@inject(HttpClient)
+@autoinject
 export class Users{
-  heading = 'Github Users';
-  users = [];
+  heading: string = 'Github Users';
+  users: any[] = [];
+  http: HttpClient;
 
-  constructor(http){
+  constructor(http: HttpClient){
     http.configure(config => {
       config
         .useStandardConfiguration()

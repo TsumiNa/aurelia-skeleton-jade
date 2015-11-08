@@ -1,7 +1,10 @@
+import { Router, RouterConfiguration } from 'aurelia-router';
+
 export class ChildRouter{
   heading = 'Child Router';
+  router: Router;
 
-  configureRouter(config, router){
+  configureRouter(config: RouterConfiguration, router: Router){
     config.map([
       { route: ['','welcome'],  name: 'welcome',       moduleId: 'client/app/welcome',       nav: true, title:'Welcome' },
       { route: 'users',         name: 'users',         moduleId: 'client/app/users',         nav: true, title:'Github Users' },

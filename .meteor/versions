@@ -59,7 +59,7 @@ standard-minifiers@1.0.2
 templating@1.1.5
 templating-tools@1.0.0
 tracker@1.0.9
-tsumina:meteor-aurelia@0.6.1
+tsumina:meteor-aurelia@0.6.2
 tsumina:meteor-systemjs@0.2.0
 tsumina:meteor-typescript@0.4.0
 twbs:bootstrap@3.3.5
