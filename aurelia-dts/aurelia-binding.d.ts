@@ -1,8 +1,18 @@
 declare module 'aurelia-binding' {
   import 'core-js';
-  import { FEATURE, DOM }  from 'aurelia-pal';
+  import { DOM }  from 'aurelia-pal';
   import { TaskQueue }  from 'aurelia-task-queue';
-  import { decorators, metadata }  from 'aurelia-metadata';
+  import { metadata }  from 'aurelia-metadata';
+  export interface OverrideContext {
+    parentOverrideContext: OverrideContext;
+    bindingContext: any;
+  }
+  
+  //  view instances implement this interface
+  export interface Scope {
+    bindingContext: any;
+    overrideContext: OverrideContext;
+  }
   export interface Disposable {
     dispose(): void;
   }
@@ -12,6 +22,14 @@ declare module 'aurelia-binding' {
   export interface CollectionObserver {
     subscribe(callback: ((changeRecords: any) => void)): Disposable;
   }
+  export interface LookupFunctions {
+    bindingBehaviors(name: string): any;
+    valueConverters(name: string): any;
+  }
+  export function camelCase(name: any): any;
+  export function createOverrideContext(bindingContext?: any, parentOverrideContext?: OverrideContext): OverrideContext;
+  export function getContextFor(name: string, scope: Scope, ancestor: number): any;
+  export function createScopeForTest(bindingContext: any, parentBindingContext?: any): Scope;
   export const sourceContext: any;
   export function connectable(): any;
   export function subscriberCollection(): any;
@@ -40,67 +58,75 @@ declare module 'aurelia-binding' {
     constructor(taskQueue: any, array: any);
     static create(taskQueue: any, array: any): any;
   }
-  class ArrayObserveObserver {
-    constructor(array: any);
-    subscribe(context: any, callable: any): any;
-    unsubscribe(context: any, callable: any): any;
-    getLengthObserver(): any;
-    handleChanges(changeRecords: any): any;
-  }
   export class Expression {
     constructor();
-    evaluate(scope: any, valueConverters: any, args?: any): any;
-    assign(scope: any, value: any, valueConverters: any): any;
+    evaluate(scope: Scope, lookupFunctions: any, args?: any): any;
+    assign(scope: Scope, value: any, lookupFunctions: any): any;
     toString(): any;
   }
   export class Chain extends Expression {
     constructor(expressions: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
+  }
+  export class BindingBehavior extends Expression {
+    constructor(expression: any, name: any, args: any);
+    evaluate(scope: any, lookupFunctions: any): any;
+    assign(scope: any, value: any, lookupFunctions: any): any;
+    accept(visitor: any): any;
+    connect(binding: any, scope: any): any;
+    bind(binding: any, scope: any, lookupFunctions: any): any;
+    unbind(binding: any, scope: any): any;
   }
   export class ValueConverter extends Expression {
     constructor(expression: any, name: any, args: any, allArgs: any);
-    evaluate(scope: any, valueConverters: any): any;
-    assign(scope: any, value: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
+    assign(scope: any, value: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class Assign extends Expression {
     constructor(target: any, value: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(vistor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class Conditional extends Expression {
     constructor(condition: any, yes: any, no: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
+    accept(visitor: any): any;
+    connect(binding: any, scope: any): any;
+  }
+  export class AccessThis extends Expression {
+    constructor(ancestor: any);
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class AccessScope extends Expression {
-    constructor(name: any);
-    evaluate(scope: any, valueConverters: any): any;
+    constructor(name: any, ancestor: any);
+    evaluate(scope: any, lookupFunctions: any): any;
     assign(scope: any, value: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class AccessMember extends Expression {
     constructor(object: any, name: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     assign(scope: any, value: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class AccessKeyed extends Expression {
     constructor(object: any, key: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     assign(scope: any, value: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class CallScope extends Expression {
-    constructor(name: any, args: any);
-    evaluate(scope: any, valueConverters: any, args: any): any;
+    constructor(name: any, args: any, ancestor: any);
+    evaluate(scope: any, lookupFunctions: any, mustEvaluate: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
@@ -108,49 +134,49 @@ declare module 'aurelia-binding' {
   //  todo: consider adding `binding.observeProperty(scope, this.name);`
   export class CallMember extends Expression {
     constructor(object: any, name: any, args: any);
-    evaluate(scope: any, valueConverters: any, args: any): any;
+    evaluate(scope: any, lookupFunctions: any, mustEvaluate: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class CallFunction extends Expression {
     constructor(func: any, args: any);
-    evaluate(scope: any, valueConverters: any, args: any): any;
+    evaluate(scope: any, lookupFunctions: any, mustEvaluate: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class Binary extends Expression {
     constructor(operation: any, left: any, right: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class PrefixNot extends Expression {
     constructor(operation: any, expression: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class LiteralPrimitive extends Expression {
     constructor(value: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class LiteralString extends Expression {
     constructor(value: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class LiteralArray extends Expression {
     constructor(elements: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
   export class LiteralObject extends Expression {
     constructor(keys: any, values: any);
-    evaluate(scope: any, valueConverters: any): any;
+    evaluate(scope: any, lookupFunctions: any): any;
     accept(visitor: any): any;
     connect(binding: any, scope: any): any;
   }
@@ -160,9 +186,11 @@ declare module 'aurelia-binding' {
     write(text: any): any;
     writeArgs(args: any): any;
     visitChain(chain: any): any;
+    visitBindingBehavior(behavior: any): any;
     visitValueConverter(converter: any): any;
     visitAssign(assign: any): any;
     visitConditional(conditional: any): any;
+    visitAccessThis(access: any): any;
     visitAccessScope(access: any): any;
     visitAccessMember(access: any): any;
     visitAccessKeyed(access: any): any;
@@ -207,6 +235,7 @@ declare module 'aurelia-binding' {
     constructor(lexer: any, input: any);
     peek: any;
     parseChain(): any;
+    parseBindingBehavior(): any;
     parseValueConverter(): any;
     parseExpression(): any;
     parseConditional(): any;
@@ -245,6 +274,7 @@ declare module 'aurelia-binding' {
     constructor();
     registerElementConfig(config: any): any;
     registerElementPropertyConfig(tagName: any, propertyName: any, events: any): any;
+    createElementHandler(events: any): any;
     registerElementHandler(tagName: any, handler: any): any;
     registerEventStrategy(eventName: any, strategy: any): any;
     getElementHandler(target: any, propertyName: any): any;
@@ -267,6 +297,7 @@ declare module 'aurelia-binding' {
     unsubscribe(context: any, callable: any): any;
   }
   export class PrimitiveObserver {
+    doNotCache: any;
     constructor(primitive: any, propertyName: any);
     getValue(): any;
     setValue(): any;
@@ -283,19 +314,6 @@ declare module 'aurelia-binding' {
     subscribe(context: any, callable: any): any;
     unsubscribe(context: any, callable: any): any;
     convertProperty(): any;
-  }
-  export class OoPropertyObserver {
-    constructor(obj: any, propertyName: any);
-    getValue(): any;
-    setValue(newValue: any): any;
-    subscribe(context: any, callable: any): any;
-    unsubscribe(context: any, callable: any): any;
-  }
-  export class OoObjectObserver {
-    constructor(obj: any, observerLocator: any);
-    subscriberAdded(): any;
-    subscriberRemoved(propertyName: any, callback: any): any;
-    getObserver(propertyName: any, descriptor: any): any;
   }
   export class XLinkAttributeObserver {
     
@@ -369,6 +387,7 @@ declare module 'aurelia-binding' {
   }
   export function hasDeclaredDependencies(descriptor: any): any;
   export function declarePropertyDependencies(ctor: any, propertyName: any, dependencies: any): any;
+  export function computedFrom(...rest: any[]): any;
   export const elements: any;
   export const presentationElements: any;
   export const presentationAttributes: any;
@@ -392,21 +411,24 @@ declare module 'aurelia-binding' {
     getObserver(object: any, propertyName: any, descriptor: any): any;
   }
   export class BindingExpression {
-    constructor(observerLocator: any, targetProperty: any, sourceExpression: any, mode: any, valueConverterLookupFunction: any, attribute: any);
+    constructor(observerLocator: any, targetProperty: any, sourceExpression: any, mode: any, lookupFunctions: any, attribute: any);
     createBinding(target: any): any;
   }
-  class Binding {
-    constructor(observerLocator: any, sourceExpression: any, target: any, targetProperty: any, mode: any, valueConverterLookupFunction: any);
+  export class Binding {
+    constructor(observerLocator: any, sourceExpression: any, target: any, targetProperty: any, mode: any, lookupFunctions: any);
+    updateTarget(value: any): any;
+    updateSource(value: any): any;
     call(context: any, newValue: any, oldValue: any): any;
     bind(source: any): any;
     unbind(): any;
   }
   export class CallExpression {
-    constructor(observerLocator: any, targetProperty: any, sourceExpression: any, valueConverterLookupFunction: any);
+    constructor(observerLocator: any, targetProperty: any, sourceExpression: any, lookupFunctions: any);
     createBinding(target: any): any;
   }
-  class Call {
-    constructor(observerLocator: any, sourceExpression: any, target: any, targetProperty: any, valueConverterLookupFunction: any);
+  export class Call {
+    constructor(observerLocator: any, sourceExpression: any, target: any, targetProperty: any, lookupFunctions: any);
+    callSource($event: any): any;
     bind(source: any): any;
     unbind(): any;
   }
@@ -417,16 +439,22 @@ declare module 'aurelia-binding' {
     register(registry: any, name: any): any;
     load(container: any, target: any): any;
   }
-  
-  // ES7 Decorators
   export function valueConverter(nameOrTarget: any): any;
-  export function computedFrom(...rest: any[]): any;
+  export class BindingBehaviorResource {
+    constructor(name: any);
+    static convention(name: any): any;
+    initialize(container: any, target: any): any;
+    register(registry: any, name: any): any;
+    load(container: any, target: any): any;
+  }
+  export function bindingBehavior(nameOrTarget: any): any;
   export class ListenerExpression {
-    constructor(eventManager: any, targetEvent: any, sourceExpression: any, delegate: any, preventDefault: any);
+    constructor(eventManager: any, targetEvent: any, sourceExpression: any, delegate: any, preventDefault: any, lookupFunctions: any);
     createBinding(target: any): any;
   }
-  class Listener {
-    constructor(eventManager: any, targetEvent: any, delegate: any, sourceExpression: any, target: any, preventDefault: any);
+  export class Listener {
+    constructor(eventManager: any, targetEvent: any, delegate: any, sourceExpression: any, target: any, preventDefault: any, lookupFunctions: any);
+    callSource(event: any): any;
     bind(source: any): any;
     unbind(): any;
   }
@@ -440,9 +468,18 @@ declare module 'aurelia-binding' {
     bind(source: any): any;
     unbind(): any;
   }
-  export const bindingEngine: any;
+  export class BindingEngine {
+    static inject: any;
+    constructor(observerLocator: any, parser: any);
+    createBindingExpression(targetProperty: string, sourceExpression: string, mode?: any, lookupFunctions?: LookupFunctions): BindingExpression;
+    propertyObserver(obj: Object, propertyName: string): PropertyObserver;
+    collectionObserver(collection: Array<any> | Map<any, any>): CollectionObserver;
+    expressionObserver(bindingContext: any, expression: string): PropertyObserver;
+    parseExpression(expression: string): Expression;
+    registerAdapter(adapter: ObjectObservationAdapter): void;
+  }
   class ExpressionObserver {
-    constructor(scope: any, expression: any);
+    constructor(scope: any, expression: any, observerLocator: any);
     subscribe(callback: any): any;
     call(): any;
   }

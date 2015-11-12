@@ -3,9 +3,8 @@
 // Definitions by: Ryan Graham <https://github.com/ryan-codingintrigue>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
-// @cmichaelgraham - added BufferSource and URLSearchParams interfaces to help compilation
-interface BufferSource {}
-interface URLSearchParams {}
+interface BufferSource { }
+interface URLSearchParams { }
 
 declare class Request extends Body {
 	constructor(input: string|Request, init?:RequestInit);
