@@ -1,5 +1,6 @@
 import {inject} from 'aurelia-framework';
 import {HttpClient} from 'aurelia-fetch-client';
+import * as collections from '../../collections'
 
 @inject(HttpClient)
 export class Users{
@@ -14,6 +15,12 @@ export class Users{
     });
 
     this.http = http;
+    Tracker.autorun(() =>{
+      Meteor.subscribe('AllUsers')
+      let user = collections.Users.find({}).fetch()[2]
+      console.log('from users');
+      console.log(user);
+    })
   }
 
   activate(){

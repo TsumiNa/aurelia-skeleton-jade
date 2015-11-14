@@ -1,4 +1,5 @@
 import {computedFrom} from 'aurelia-framework';
+import {Users} from '../../collections'
 
 export class Welcome {
 
@@ -12,6 +13,13 @@ export class Welcome {
     this.firstName = 'Liu';
     this.lastName = 'Ping';
     this.previousValue = this.fullName;
+
+    Tracker.autorun(() =>{
+      Meteor.subscribe('AllUsers')
+      let user = Users.find({}).fetch()[2]
+      console.log(user);
+    })
+
   }
 
   //Getters can't be observed with Object.observe, so they must be dirty checked.
@@ -24,7 +32,9 @@ export class Welcome {
 
   submit(){
     this.previousValue = this.fullName;
-    alert(`Welcome, ${this.fullName}!`);
+    // alert(`Welcome, ${this.fullName}!`);
+    Meteor.call('addUser', this.firstName, this.lastName)
+    // Users.insert({fn: this.firstName, ln: this.lastName})
   }
 
   canDeactivate() {
