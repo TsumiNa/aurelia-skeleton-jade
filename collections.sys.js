@@ -1,4 +1,10 @@
-export var Users = new Mongo.Collection('Users');
+export const Users = new Mongo.Collection('Users');
+
+Meteor.methods({
+    addUser(fn: String, ln: String){
+        Users.insert({fn: fn, ln: ln});
+    }
+})
 
 if (Meteor.isServer) {
     Meteor.publish('AllUsers', ()=>{
@@ -9,9 +15,3 @@ if (Meteor.isServer) {
 if (Meteor.isClient) {
     
 };
-
-Meteor.methods({
-    addUser(fn: String, ln: String){
-        Users.insert({fn: fn, ln: ln});
-    }
-})

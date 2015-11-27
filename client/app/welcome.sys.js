@@ -16,7 +16,7 @@ export class Welcome {
 
     Tracker.autorun(() =>{
       Meteor.subscribe('AllUsers')
-      let user = Users.find({}).fetch()[2]
+      let user = Users.find({}).fetch()[0]
       console.log(user);
     })
 
