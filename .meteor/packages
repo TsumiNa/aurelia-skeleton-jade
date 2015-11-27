@@ -11,7 +11,7 @@ session                 # Client-side reactive dictionary for your app
 jquery                  # Helpful client-side library
 tracker                 # Meteor's client-side reactive programming library
 
-ecmascript
+# ecmascript
 standard-minifiers      # JS/CSS minifiers run for production mode
 # autopublish             # Publish all data to the clients (for prototyping)
 # insecure                # Allow all DB writes from clients (for prototyping)
